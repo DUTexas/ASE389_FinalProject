@@ -1,13 +1,15 @@
 using FinalProject
-
+using RigidBodyDynamics
 using MeshCatMechanisms
+using StaticArrays
 
-function main()
+
+function show_robot()
     # robot = create_puma_560()
     mechanism = create_two_puma_560()
-    # mvis = MechanismVisualizer(robot, Skeleton(inertias=false))
+    mvis = MechanismVisualizer(mechanism, Skeleton(inertias=false))
     # mvis = MechanismVisualizer(robot, URDFVisuals("src/urdf/puma560.urdf"))
-    mvis = MechanismVisualizer(mechanism, URDFVisuals("src/urdf/puma560_two.urdf"))
+    # mvis = MechanismVisualizer(mechanism, URDFVisuals("src/urdf/puma560_two.urdf"))
     open(mvis)
     for body in bodies(mechanism)
         setelement!(mvis, default_frame(body))
@@ -28,4 +30,4 @@ function main()
     # transform(state, point, root_frame(mechanism))
 end
 
-main()
+check_kinematics()
