@@ -24,7 +24,7 @@ function ParametricOptimizationProblem(;
     objective,
     equality_constraint,
     inequality_constraint,
-    parameter_dimension = 1,
+    parameter_dimension=1,
     primal_dimension,
     equality_dimension,
     inequality_dimension,
@@ -38,7 +38,9 @@ function ParametricOptimizationProblem(;
     z̃ = Symbolics.scalarize(only(@variables(z̃[1:total_dimension])))
     z = BlockArray(z̃, [primal_dimension, equality_dimension, inequality_dimension])
 
-    x = z[Block(1)]
+    n = Int64(((primal_dimension / dof / 2) + 1) / 2)
+    x = BlockArray(z[Block(1)], dof * [n, n - 1, n, n - 1])
+    x = mortar(map(block -> BlockArray(block, dof * ones(Int, Int(length(block) / dof))), blocks(x)))
     λ = z[Block(2)]
     μ = z[Block(3)]
 
@@ -63,7 +65,7 @@ function ParametricOptimizationProblem(;
 
     # Build parametric MCP.
     # @infiltrate
-    parametric_mcp = ParametricMCP(F, z̃, θ, z̲, z̅; compute_sensitivities = false)
+    parametric_mcp = ParametricMCP(F, z̃, θ, z̲, z̅; compute_sensitivities=false)
 
     ParametricOptimizationProblem(
         objective,
@@ -84,9 +86,9 @@ end
 "Solve a constrained parametric optimization problem."
 function solve(
     problem::ParametricOptimizationProblem,
-    parameter_value = zeros(problem.parameter_dimension);
-    initial_guess = nothing,
-    verbose = false,
+    parameter_value=zeros(problem.parameter_dimension);
+    initial_guess=nothing,
+    verbose=false,
 )
     z0 = if !isnothing(initial_guess)
         initial_guess
@@ -97,15 +99,15 @@ function solve(
     z, status, info = ParametricMCPs.solve(
         problem.parametric_mcp,
         parameter_value;
-        initial_guess = z0,
+        initial_guess=z0,
         verbose,
-        cumulative_iteration_limit = 100000,
-        proximal_perturbation = 1e-2,
-        use_basics = true,
-        use_start = true,
+        cumulative_iteration_limit=100000,
+        proximal_perturbation=1e-2,
+        use_basics=true,
+        use_start=true,
     )
 
     primals = z[1:(problem.primal_dimension)]
 
-    (; primals, variables = z, status, info)
+    (; primals, variables=z, status, info)
 end
