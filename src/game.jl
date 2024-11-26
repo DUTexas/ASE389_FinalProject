@@ -1,5 +1,5 @@
 function create_dynamic_game(goal; Δt=0.1, T=10)
-    n = Int64(T / Δt)
+    n = Int64(T / Δt) + 1
 
     xf1, xf2 = blocks(goal)
     f(x, θ) =
@@ -14,15 +14,17 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
         let
             x1, u1, x2, u2 = map(blocks, blocks(x))
             A = (I-diagm(1 => [I for _ in 1:(n-1)]))[1:(n-1), :]
-            vcat((A * x1 + u1 * Δt)..., (A * x2 + u2 * Δt)...)
+            vcat(x1[1], (A * x1 + u1 * Δt)..., x2[1], (A * x2 + u2 * Δt)...)
         end
 
-    bubbles = [(4, [0, 0, 0])]
-    R = 1
+    bubbles = [(4, [2, 0, 0])]
+    R = 0.1
+    umax = 10
     h(x, θ) =
         let
             x1, u1, x2, u2 = map(blocks, blocks(x))
-            vcat(u1..., u2..., [
+            # @infiltrate
+            vcat(-abs.(vcat(u1...)) + umax * ones(dof * (n - 1)), -abs.(vcat(u2...)) + umax * ones(dof * (n - 1)), [
                 norm_sqr(forward(r1, x1[tt], ind1, p1) - forward(r2, x2[tt], ind2, p2)) - R
                 for tt in 1:n, (ind1, p1) in bubbles, (ind2, p2) in bubbles
             ]...)
@@ -34,7 +36,7 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
         inequality_constraint=h,
         parameter_dimension=1,
         primal_dimension=2 * dof * (2n - 1),
-        equality_dimension=2 * dof * (n - 1),
+        equality_dimension=2 * dof * n,
         inequality_dimension=2(n - 1) * dof + Int64(n * length(bubbles) * (length(bubbles) + 1) / 2)
     )
 end
