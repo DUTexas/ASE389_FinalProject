@@ -1,8 +1,3 @@
-"""Setup a constrained potential dynamic game here.
-"""
-
-using FinalProject
-
 function create_dynamic_game(goal; Δt=0.1, T=10)
     n = Int64(T / Δt)
 
@@ -22,7 +17,7 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
             vcat((A * x1 + u1 * Δt)..., (A * x2 + u2 * Δt)...)
         end
 
-    bubbles = [(4, (0, 0, 0))]
+    bubbles = [(4, [0, 0, 0])]
     R = 1
     h(x, θ) =
         let

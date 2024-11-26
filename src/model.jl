@@ -1,7 +1,3 @@
-using Infiltrator
-using MeshCatMechanisms
-
-
 export create_puma_560
 function create_puma_560()
     urdf = "src/urdf/puma560.urdf"
