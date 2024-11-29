@@ -1,3 +1,15 @@
+function collision_bubbles()
+    bubbles = [
+        (3, [0.0, 0.0, 0.0]),
+        (3, [0.2, 0.0, 0.0]),
+        (4, [0.0, 0.0, 0.0]),
+        (4, [0.15, 0.0, 0.0]),
+        (4, [0.3, 0.0, 0.0])
+    ]
+    R = 0.1
+    return bubbles, R
+end
+
 function create_dynamic_game(goal; Δt=0.1, T=10)
     n = Int64(T / Δt) + 1
 
@@ -13,19 +25,19 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
     g(x, θ) =
         let
             x1, u1, x2, u2 = map(blocks, blocks(x))
+            θ = blocks(θ)
             A = (I-diagm(1 => [I for _ in 1:(n-1)]))[1:(n-1), :]
-            vcat(x1[1], (A * x1 + u1 * Δt)..., x2[1], (A * x2 + u2 * Δt)...)
+            vcat(x1[1] - θ[1], (A * x1 + u1 * Δt)..., x2[1] - θ[2], (A * x2 + u2 * Δt)...)
         end
 
-    bubbles = [(4, [2, 0, 0])]
-    R = 0.1
-    umax = 10
+    umax = 1
+    bubbles, R = collision_bubbles()
     h(x, θ) =
         let
             x1, u1, x2, u2 = map(blocks, blocks(x))
             # @infiltrate
             vcat(-abs.(vcat(u1...)) + umax * ones(dof * (n - 1)), -abs.(vcat(u2...)) + umax * ones(dof * (n - 1)), [
-                norm_sqr(forward(r1, x1[tt], ind1, p1) - forward(r2, x2[tt], ind2, p2)) - R
+                norm_sqr(forward(r1, x1[tt], ind1, p1) - forward(r2, x2[tt], ind2, p2)) - R^2
                 for tt in 1:n, (ind1, p1) in bubbles, (ind2, p2) in bubbles
             ]...)
         end
@@ -34,9 +46,9 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
         objective=f,
         equality_constraint=g,
         inequality_constraint=h,
-        parameter_dimension=1,
+        parameter_dimension=r1.dof + r2.dof,
         primal_dimension=2 * dof * (2n - 1),
         equality_dimension=2 * dof * n,
-        inequality_dimension=2(n - 1) * dof + Int64(n * length(bubbles) * (length(bubbles) + 1) / 2)
+        inequality_dimension=2(n - 1) * dof + n * length(bubbles)^2
     )
 end

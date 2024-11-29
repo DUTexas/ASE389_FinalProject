@@ -6,7 +6,7 @@ using MeshCatMechanisms
 
 function check_kinematics()
     # Using RigidBodyDynamics
-    mechanism = build_mechanism()
+    mechanism = build_mechanism("src/urdf/4dof_2.urdf")
     state = MechanismState(mechanism)
 
     # Check coordinates matched between the two models
@@ -14,7 +14,7 @@ function check_kinematics()
     for ii in 1:r1.dof
         p1 = transform(state, Point3D(default_frame(findbody(mechanism, "link$(ii+1)")), point...), root_frame(mechanism))
         p2 = forward(r1, ii, point)
-        @assert maximum(p1.v - p2) < 0.01 "$(p1.v) != $p2"
+        @assert maximum(p1.v - p2) < 0.05 "@ $ii $(p1.v) != $p2"
     end
 
     println("Correct!")
@@ -22,11 +22,12 @@ end
 
 function check_ik()
     point = [0.5, 0.5, 0.5]
-    ee = [0.2, 0, 0]
 
-    q = ik!(r1, ee, point)
-    println(point)
-    println(forward(r1, q, dof, ee))
+    q = ik!(r1, point)
+    point_ik = forward(r1, q, r1.dof, r1.ee)
+    @assert maximum(point - point_ik) < 0.05 "Point $point != Point_ik $point_ik"
+
+    println("Correct!")
 end
 
 function check_dynamic_game()

@@ -46,7 +46,7 @@ function ParametricOptimizationProblem(;
 
     # Define a symbolic variable for the parameters.
     @variables θ̃[1:(parameter_dimension)]
-    θ = Symbolics.scalarize(θ̃)
+    θ = BlockArray(Symbolics.scalarize(θ̃), fill(Int64(parameter_dimension / 2), 2))
 
     # Build symbolic expressions for objective and constraints.
     f = objective(x, θ)
@@ -64,8 +64,11 @@ function ParametricOptimizationProblem(;
     z̅ = vcat(Inf * ones(size(x)), Inf * ones(size(λ)), Inf * ones(size(μ)))
 
     # Build parametric MCP.
-    # @infiltrate
-    parametric_mcp = ParametricMCP(F, z̃, θ, z̲, z̅; compute_sensitivities=false)
+    parametric_mcp = ParametricMCP(
+        F, z̃, Vector(θ), z̲, z̅; 
+        compute_sensitivities=false, 
+        backend_options=(; parallel=Symbolics.MultithreadedForm())
+    )
 
     ParametricOptimizationProblem(
         objective,

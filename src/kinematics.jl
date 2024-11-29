@@ -45,8 +45,8 @@ function forward(r::Robot, x::Vector{<:Real}, ind::Integer, p::Vector{<:Real})
     (r.T₀*reduce(*, [get_transformation_matrix(r, ii, x) for ii in 1:ind])*p)[1:3]
 end
 
-function ik!(r::Robot, ee::Vector{<:Real}, point::Vector{<:Float64})
-    f(x) = forward(r, x, r.dof, ee) - point
+function ik!(r::Robot, point::Vector{<:Float64})
+    f(x) = forward(r, x, r.dof, r.ee) - point
     sol = nlsolve(f, [0., 0., 0., 0.])
     sol.zero
 end
