@@ -45,10 +45,14 @@ function forward(r::Robot, x::Vector{<:Real}, ind::Integer, p::Vector{<:Real})
     (r.T₀*reduce(*, [get_transformation_matrix(r, ii, x) for ii in 1:ind])*p)[1:3]
 end
 
+function forward(r::Robot, x::Vector{<:Real})
+    forward(r, x, r.dof, r.ee)
+end
+
 function ik!(r::Robot, point::Vector{<:Float64})
     f(x) = forward(r, x, r.dof, r.ee) - point
-    sol = nlsolve(f, [0., 0., 0., 0.])
-    sol.zero
+    sol = nlsolve(f, fill(0.0, r.dof))
+    map(x -> mod(x, 2sign(x)pi), sol.zero)
 end
 
 function build_mechanism(urdf::String="src/urdf/4dof.urdf")

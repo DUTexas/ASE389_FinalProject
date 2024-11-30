@@ -10,12 +10,12 @@ function collision_bubbles()
     return bubbles, R
 end
 
-function create_dynamic_game(goal; Δt=0.1, T=10)
+function create_dynamic_game(; Δt=0.1, T=1)
     n = Int64(T / Δt) + 1
 
-    xf1, xf2 = blocks(goal)
     f(x, θ) =
         let
+            xf1, xf2 = blocks(θ)[3:4]
             x1, u1, x2, u2 = map(blocks, blocks(x))
             c1 = sum(norm_sqr(x1[tt] - xf1) + 0.01norm_sqr(u1[tt]) for tt in 1:n-1)
             c2 = sum(norm_sqr(x2[tt] - xf2) + 0.01norm_sqr(u2[tt]) for tt in 1:n-1)
@@ -46,7 +46,7 @@ function create_dynamic_game(goal; Δt=0.1, T=10)
         objective=f,
         equality_constraint=g,
         inequality_constraint=h,
-        parameter_dimension=r1.dof + r2.dof,
+        parameter_dimension=2(r1.dof + r2.dof),
         primal_dimension=2 * dof * (2n - 1),
         equality_dimension=2 * dof * n,
         inequality_dimension=2(n - 1) * dof + n * length(bubbles)^2

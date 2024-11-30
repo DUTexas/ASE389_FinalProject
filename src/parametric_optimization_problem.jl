@@ -46,7 +46,7 @@ function ParametricOptimizationProblem(;
 
     # Define a symbolic variable for the parameters.
     @variables θ̃[1:(parameter_dimension)]
-    θ = BlockArray(Symbolics.scalarize(θ̃), fill(Int64(parameter_dimension / 2), 2))
+    θ = BlockArray(Symbolics.scalarize(θ̃), fill(Int64(parameter_dimension / 4), 4))
 
     # Build symbolic expressions for objective and constraints.
     f = objective(x, θ)
@@ -101,7 +101,7 @@ function solve(
 
     z, status, info = ParametricMCPs.solve(
         problem.parametric_mcp,
-        parameter_value;
+        parameter_value; # [state1, state2, goal1, goal2]
         initial_guess=z0,
         verbose,
         cumulative_iteration_limit=100000,
