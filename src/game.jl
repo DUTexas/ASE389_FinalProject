@@ -37,7 +37,7 @@ function create_dynamic_game(; Δt=0.1, T=1)
             x1, u1, x2, u2 = map(blocks, blocks(x))
             # @infiltrate
             vcat(-abs.(vcat(u1...)) + umax * ones(dof * (n - 1)), -abs.(vcat(u2...)) + umax * ones(dof * (n - 1)), [
-                norm_sqr(forward(r1, x1[tt], ind1, p1) - forward(r2, x2[tt], ind2, p2)) - R^2
+                norm_sqr(forward(r1, x1[tt], ind1, p1) - forward(r2, x2[tt], ind2, p2)) - (2R)^2
                 for tt in 1:n, (ind1, p1) in bubbles, (ind2, p2) in bubbles
             ]...)
         end
