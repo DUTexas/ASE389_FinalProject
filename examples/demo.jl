@@ -10,7 +10,7 @@ using StaticArrays
 using Random: seed!
 
 function visualize_robot(; bubbles=true, frame=false)
-    # Create robotic arms
+    # Create robotic arms but doesn't display them
     mechanism = build_mechanism("src/urdf/4dof_2.urdf")
     mvis = MechanismVisualizer(mechanism, Skeleton(inertias=false))
 
@@ -37,6 +37,7 @@ function visualize_robot(; bubbles=true, frame=false)
 end
 
 function show_robot()
+    # Shows robot with collision spheres visualized
     mvis, mechanism = visualize_robot(frame=true)
     open(mvis)
 
@@ -51,6 +52,7 @@ function show_robot()
 
     state = MechanismState(mechanism)
     q = configuration(state)
+
     # Calculate joint configurations to reach desired points
     qf1 = ik!(r1, point1)
     qf2 = ik!(r2, point2)
@@ -138,7 +140,7 @@ function show_animation(goals, trajs, ts)
     # println("R2 EE = $(forward(r2, traj2[end], r2.dof, r2.ee))")
     # animation = Animation(mvis, ts, qs; fps=25)
     # setanimation!(mvis, animation)
-    MeshCatMechanisms.animate(mvis, ts, qs; realtimerate=1.)
+    MeshCatMechanisms.animate(mvis, ts, qs; realtimerate=1.0)
     return mvis, ts, qs
 end
 
@@ -188,7 +190,7 @@ function main(problem=nothing, Δt=1, T=2)
         counts = [0, 0]
 
         # Locations of buckets for dropping objects
-        drop_locations = [[0., -1., 0.], [1.5, 0.8, 0]]
+        drop_locations = [[0.0, -1.0, 0.0], [1.5, 0.8, 0]]
 
         # Generate initial objects
         goals_cartesian = [generate_object(players[ii]) for ii in 1:2]
